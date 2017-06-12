@@ -32,4 +32,4 @@ Then you should update your Homebridge config.json with an accessory entry for e
               "password" : "SESAME_PASSWORD"
         }
 ```
-Where LOCK_NAME is the name of your Sesame as it appears in the Sesame app, EMAIL_ADDRESS is the email you use to login, and SESAME_PASSWORD is the password.
+Where __LOCK_NAME__ is the name of your Sesame as it appears in the Sesame app, __EMAIL_ADDRESS__ is the email you use to login, and __SESAME_PASSWORD__ is the password.
