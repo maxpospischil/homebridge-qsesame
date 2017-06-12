@@ -22,8 +22,8 @@ __Example of config.json entry__
         {
               "accessory" : "QSesame",
               "name" : "LOCK_NAME",
-			        "username" : "EMAIL_ADDRESS",
-			        "password" : "SESAME_PASSWORD"
+	      "username" : "EMAIL_ADDRESS",
+	      "password" : "SESAME_PASSWORD"
         }
 ```
 
