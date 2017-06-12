@@ -136,6 +136,9 @@ QSesame.prototype.setLockID = function(err, json) {
 /* GET THE STATE FROM THE API */
 QSesame.prototype.getState = function(callback) {
   	self.log("Getting current state..."); 
+	if (self.lockID == false) {
+		return;
+	}
   	request.get({
     	url: self.url + "sesames/" + self.lockID,
 		headers: self.headers
@@ -158,6 +161,10 @@ QSesame.prototype.getState = function(callback) {
 
 /* CONTROL THE STATE OF THE SESAME */
 QSesame.prototype.setState = function(state, callback) {
+	if (self.lockID == false) {
+		return;
+	}
+	
   	var lockState = (state == Characteristic.LockTargetState.SECURED) ? "lock" : "unlock";
 
   	self.log("Set state to %s", lockState);
@@ -195,6 +202,9 @@ QSesame.prototype.setState = function(state, callback) {
 
 /* FETCH BATTERY INFO */
 QSesame.prototype.getBattery = function(callback) {
+	if (self.lockID == false) {
+		return;
+	}
 	self.log("Getting current battery..."); 
   	request.get({
     	url: self.url + "sesames/" + self.lockID,
@@ -215,6 +225,9 @@ QSesame.prototype.getBattery = function(callback) {
 
 /* CHECK FOR LOW BATTERY NOTIFICATION */
 QSesame.prototype.getLowBattery = function(callback) {
+	if (self.lockID == false) {
+		return;
+	}
 	self.log("Getting current battery..."); 
   	request.get({
     	url: self.url + "sesames/" + self.lockID,
