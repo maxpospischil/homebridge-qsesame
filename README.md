@@ -14,10 +14,16 @@ In order to use QSesame you must have:
 
 1. A Sesame smart lock with API access enabled
 2. The Vritual Station app or WiFi Access Point
-3. Nodejs and npm installed
+3. NodeJS and NPM installed
 4. Homebridge installed (with accessory added to config.json)
 
-__Example of config.json entry__
+# Installation
+
+You can install QSesame via NPM by issuing the following command:
+```
+sudo npm install -g homebridge-qsesame
+```
+Then you should update your Homebridge config.json with an accessory entry for each Sesame.
  ```
         {
               "accessory" : "QSesame",
@@ -26,4 +32,4 @@ __Example of config.json entry__
               "password" : "SESAME_PASSWORD"
         }
 ```
-
+Where LOCK_NAME is the name of your Sesame as it appears in the Sesame app, EMAIL_ADDRESS is the email you use to login, and SESAME_PASSWORD is the password.
