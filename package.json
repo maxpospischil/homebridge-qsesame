@@ -1,0 +1,29 @@
+{
+  "name": "homebridge-qsesame",
+  "version": "0.0.5",
+  "description": "Sesame smartlock plugin",
+  "license": "LICENSED",
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/quacktacular/homebridge-qsesame.git"
+  },
+  "bugs": {
+    "url": "http://github.com/quacktacular/homebridge-qsesame/issues"
+  },
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "homepage": "https://github.com/quacktacular/homebridge-qsesame#readme",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "author": "Brendan DeBrincat <brendan@quacktacular.net> (http://quacktacular.net)",
+  "dependencies": {
+    "request": "^2.81.0"
+  }
+}
