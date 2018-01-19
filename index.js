@@ -148,7 +148,7 @@ QSesame.prototype.getState = function(callback) {
 			// API returns "is_unlocked" as true or false
 					var state = json.is_unlocked;
 			// HAP and HomeKit work based on "locked" so we'll convert
-				var locked = !state;
+				var locked = state;
 					self.log("Lock state is %s", locked);
 					callback(null, locked);
 			} else {
