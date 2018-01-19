@@ -17,7 +17,7 @@ module.exports = function(homebridge) {
 /* THE MAIN PLUGIN FUNCTION */
 function QSesame(log, config) {
 	// Populate our member variables
- 	self = this;
+	self = this;
 	this.log = log;
 	this.name = config["name"];
 	this.username = config["username"];
@@ -58,18 +58,18 @@ function QSesame(log, config) {
 	// Create the new informationService for HAP
 	this.informationService = new Service.AccessoryInformation();
 
-    this.informationService
-      	.setCharacteristic(Characteristic.Manufacturer, "CANDY HOUSE")
-      	.setCharacteristic(Characteristic.Model, "Sesame");
+		this.informationService
+				.setCharacteristic(Characteristic.Manufacturer, "CANDY HOUSE")
+				.setCharacteristic(Characteristic.Model, "Sesame");
 }
 
 
 /* AUThENTICATE ON CANDY HOUSE API */
 QSesame.prototype.apiLogin = function() {
-  	self.log("Attempting to login to CANDY HOUSE..."); 
+		self.log("Attempting to login to CANDY HOUSE..."); 
 	request({
-   		method: "POST",
-    	json: true,
+			method: "POST",
+			json: true,
 		url: self.url + "accounts/login",
 		headers: self.headers,
 		body: { 	
@@ -95,20 +95,20 @@ QSesame.prototype.apiLogin = function() {
 
 /* GET ALL THE SESAMES */
 QSesame.prototype.listSesames = function(callback) {
-  	self.log("Getting the list of Sesames from API..."); 
-  	request.get({
-    	url: self.url + "sesames",
+		self.log("Getting the list of Sesames from API..."); 
+		request.get({
+			url: self.url + "sesames",
 		headers: self.headers
-  }, function(err, response, body) {    
-    if (!err && response.statusCode == 200) {
-      	var json = JSON.parse(body);
-  		self.log("Got a Sesames JSON from CANDY HOUSE!"); 	
-      	callback(null, json); 
-    } else {
-      	self.log("Error getting Sesames (status code %s): %s", response.statusCode, err);
-     	callback(err);
-    }
-  });
+	}, function(err, response, body) {    
+		if (!err && response.statusCode == 200) {
+				var json = JSON.parse(body);
+			self.log("Got a Sesames JSON from CANDY HOUSE!"); 	
+				callback(null, json); 
+		} else {
+				self.log("Error getting Sesames (status code %s): %s", response.statusCode, err);
+			callback(err);
+		}
+	});
 }
 
 
@@ -135,27 +135,27 @@ QSesame.prototype.setLockID = function(err, json) {
 
 /* GET THE STATE FROM THE API */
 QSesame.prototype.getState = function(callback) {
-  	self.log("Getting current state..."); 
+		self.log("Getting current state..."); 
 	if (self.lockID == false) {
 		return;
 	}
-  	request.get({
-    	url: self.url + "sesames/" + self.lockID,
+		request.get({
+			url: self.url + "sesames/" + self.lockID,
 		headers: self.headers
-  	}, function(err, response, body) {    
-    	if (!err && response.statusCode == 200) {
-      		var json = JSON.parse(body);
+		}, function(err, response, body) {    
+			if (!err && response.statusCode == 200) {
+					var json = JSON.parse(body);
 			// API returns "is_unlocked" as true or false
-      		var state = json.is_unlocked;
+					var state = json.is_unlocked;
 			// HAP and HomeKit work based on "locked" so we'll convert
-     	 	var locked = !state;
-      		self.log("Lock state is %s", locked);
-      		callback(null, locked);
-    	} else {
-     		self.log("Error getting state (status code %s): %s", response.statusCode, err);
-      		callback(err);
-    	}
-  	}.bind(self));
+				var locked = !state;
+					self.log("Lock state is %s", locked);
+					callback(null, locked);
+			} else {
+				self.log("Error getting state (status code %s): %s", response.statusCode, err);
+					callback(err);
+			}
+		}.bind(self));
 }
 
 
@@ -165,18 +165,18 @@ QSesame.prototype.setState = function(state, callback) {
 		return;
 	}
 	
-  	var lockState = (state == Characteristic.LockTargetState.SECURED) ? "lock" : "unlock";
+		var lockState = (state == Characteristic.LockTargetState.SECURED) ? "lock" : "unlock";
 
-  	self.log("Set state to %s", lockState);
+		self.log("Set state to %s", lockState);
 
 	var controlURL = self.url + "sesames/" + self.lockID + "/control"
 
-  	self.log(controlURL);
-  	self.log(lockState);
+		self.log(controlURL);
+		self.log(lockState);
 
 	request({
-   		method: "POST",
-    	json: true,
+		method: "POST",
+		json: true,
 		url: controlURL,
 		headers: self.headers,
 		body: { "type": lockState }
@@ -184,16 +184,27 @@ QSesame.prototype.setState = function(state, callback) {
 		if (!err && response.statusCode == 204) {
 			self.log("State change complete.");
 
-	  		// Looks like we're good. The Sesame API does not send content with the response
-	  		var currentState = (state == Characteristic.LockTargetState.SECURED) ?
+				// Looks like we're good. The Sesame API does not send content with the response
+				var currentState = (state == Characteristic.LockTargetState.SECURED) ?
 				Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;
 
-	  		self.lockService
+				self.lockService
 				.setCharacteristic(Characteristic.LockCurrentState, currentState);
 
 			callback(null);
 		} else {
-			self.log("Error '%s' setting lock state. Response: %s", err, body);
+			if(response.statusCode == 400) {
+				if(response.body.code == 32000) {
+					self.log("CloudAPINotEnabled: Need to go into sesame app and enable 'Cloud Integration'");
+				} else {
+					self.log("Sesame API returned a bad request status with Sesame api error code: " + response.body.code);
+					self.log("Look up what it means at: https://docs.candyhouse.co/#errors");
+				}
+			} else {
+				self.log("Sesame api returned http status: " + response.statusCode + " and Sesame api error code: " + response.body.code);
+				self.log("Look up what it means at: https://docs.candyhouse.co/#errors");
+			}
+			
 			callback(err || new Error("Error setting lock state."));
 		}
 	}.bind(self));
@@ -206,19 +217,19 @@ QSesame.prototype.getBattery = function(callback) {
 		return;
 	}
 	self.log("Getting current battery..."); 
-  	request.get({
-    	url: self.url + "sesames/" + self.lockID,
+		request.get({
+			url: self.url + "sesames/" + self.lockID,
 		headers: self.headers
-  	}, function(err, response, body) {    
-    	if (!err && response.statusCode == 200) {
-      		var json = JSON.parse(body);
-      		var battery = json.battery;
-      		self.log("Lock battery is %s", battery);
-      		callback(null, battery); 
-    	} else {
-      		self.log("Error getting battery (status code %s): %s", response.statusCode, err);
-      		callback(err);
-    	}
+		}, function(err, response, body) {    
+			if (!err && response.statusCode == 200) {
+					var json = JSON.parse(body);
+					var battery = json.battery;
+					self.log("Lock battery is %s", battery);
+					callback(null, battery); 
+			} else {
+					self.log("Error getting battery (status code %s): %s", response.statusCode, err);
+					callback(err);
+			}
 	}.bind(self));
 }
 
@@ -229,20 +240,20 @@ QSesame.prototype.getLowBattery = function(callback) {
 		return;
 	}
 	self.log("Getting current battery..."); 
-  	request.get({
-    	url: self.url + "sesames/" + self.lockID,
+		request.get({
+			url: self.url + "sesames/" + self.lockID,
 		headers: self.headers
- 	}, function(err, response, body) {    
-    	if (!err && response.statusCode == 200) {
-      		var json = JSON.parse(body);
-      		var battery = json.battery;
-      		self.log("Lock battery is %s", battery);
-	  		var low = (battery > 20) ? Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL : Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
-      		callback(null, low); // success
-    	} else {
-      		self.log("Error getting battery (status code %s): %s", response.statusCode, err);
-      		callback(err);
-    	}
+	}, function(err, response, body) {    
+			if (!err && response.statusCode == 200) {
+					var json = JSON.parse(body);
+					var battery = json.battery;
+					self.log("Lock battery is %s", battery);
+				var low = (battery > 20) ? Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL : Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
+					callback(null, low); // success
+			} else {
+					self.log("Error getting battery (status code %s): %s", response.statusCode, err);
+					callback(err);
+			}
 	}.bind(self));
 }
 
